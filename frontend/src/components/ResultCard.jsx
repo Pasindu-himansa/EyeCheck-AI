@@ -19,6 +19,12 @@ const conditionStyles = {
     border: "border-yellow-400/30",
     icon: Eye,
   },
+  Suspect: {
+    color: "text-orange-300",
+    bg: "bg-orange-400/10",
+    border: "border-orange-400/30",
+    icon: AlertTriangle,
+  },
   Inconclusive: {
     color: "text-gray-300",
     bg: "bg-gray-400/10",
@@ -35,6 +41,11 @@ function getConfidenceStyle(percentage) {
   return { text: "text-red-300", bar: "bg-red-400" };
 }
 
+const modelLabels = {
+  groq: "Groq Vision AI",
+  local: "Local CNN Model",
+};
+
 function ResultCard({ result }) {
   const style =
     conditionStyles[result.condition] || conditionStyles.Inconclusive;
@@ -44,6 +55,13 @@ function ResultCard({ result }) {
 
   return (
     <div className="w-full space-y-4">
+      {/* Model used badge */}
+      {result.model_used && (
+        <p className="text-xs text-white/40 uppercase tracking-wide text-right">
+          Analyzed with: {modelLabels[result.model_used] || result.model_used}
+        </p>
+      )}
+
       {/* Disease box */}
       <div
         className={`flex items-center gap-3 rounded-xl border ${style.border} ${style.bg} p-4`}

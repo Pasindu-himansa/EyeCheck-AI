@@ -6,6 +6,7 @@ const TEST_TYPES = [{ value: "cornea_topography", label: "Cornea Topography" }];
 
 function App() {
   const [selectedTest, setSelectedTest] = useState("cornea_topography");
+  const [selectedModel, setSelectedModel] = useState("groq");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,6 +18,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("model", selectedModel);
 
     try {
       const response = await fetch(
@@ -65,6 +67,41 @@ function App() {
               </option>
             ))}
           </select>
+
+          {/* Model toggle */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-white/80 mb-2">
+              Analysis Model
+            </label>
+            <div className="flex rounded-md border border-white/20 overflow-hidden">
+              <button
+                onClick={() => setSelectedModel("groq")}
+                className={`flex-1 py-2 text-sm font-medium transition ${
+                  selectedModel === "groq"
+                    ? "bg-cyan-500 text-white"
+                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                }`}
+              >
+                Groq AI (Vision)
+              </button>
+              <button
+                onClick={() => setSelectedModel("local")}
+                className={`flex-1 py-2 text-sm font-medium transition ${
+                  selectedModel === "local"
+                    ? "bg-cyan-500 text-white"
+                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                }`}
+              >
+                Local Model (CNN)
+              </button>
+            </div>
+            {selectedModel === "local" && (
+              <p className="mt-2 text-xs text-white/40">
+                Local model expects an axial/sagittal curvature map (Sag_A type
+                image).
+              </p>
+            )}
+          </div>
 
           {selectedTest === "cornea_topography" && (
             <ImageUpload onAnalyze={handleAnalyze} />
