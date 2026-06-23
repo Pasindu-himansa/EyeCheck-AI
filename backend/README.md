@@ -2,7 +2,7 @@
 title: EyeCheck AI Backend
 emoji: 👁
 colorFrom: blue
-colorTo: cyan
+colorTo: blue
 sdk: docker
 app_port: 7860
 ---
