@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ImageUpload from "./components/ImageUpload";
 import ResultCard from "./components/ResultCard";
 
 const TEST_TYPES = [{ value: "cornea_topography", label: "Cornea Topography" }];
 
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 function App() {
   const [selectedTest, setSelectedTest] = useState("cornea_topography");
   const [selectedModel, setSelectedModel] = useState("groq");
+  const [localModelAvailable, setLocalModelAvailable] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/model-status`)
+      .then((r) => r.json())
+      .then((data) => {
+        setLocalModelAvailable(data.local_model_available);
+        if (!data.local_model_available) setSelectedModel("groq");
+      })
+      .catch(() => setLocalModelAvailable(false));
+  }, []);
 
   const handleAnalyze = async (file) => {
     setLoading(true);
@@ -21,13 +34,10 @@ function App() {
     formData.append("model", selectedModel);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/analyze/cornea-topography",
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(`${API_URL}/analyze/cornea-topography`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) throw new Error("Analysis failed");
 
@@ -85,20 +95,23 @@ function App() {
                 Groq AI (Vision)
               </button>
               <button
-                onClick={() => setSelectedModel("local")}
+                onClick={() => localModelAvailable && setSelectedModel("local")}
+                disabled={!localModelAvailable}
                 className={`flex-1 py-2 text-sm font-medium transition ${
                   selectedModel === "local"
                     ? "bg-cyan-500 text-white"
-                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                    : localModelAvailable
+                      ? "bg-white/5 text-white/60 hover:bg-white/10"
+                      : "bg-white/5 text-white/20 cursor-not-allowed"
                 }`}
               >
-                Local Model (CNN)
+                Local CNN {!localModelAvailable && "(unavailable)"}
               </button>
             </div>
-            {selectedModel === "local" && (
+            {selectedModel === "local" && localModelAvailable && (
               <p className="mt-2 text-xs text-white/40">
-                Local model expects an axial/sagittal curvature map (Sag_A type
-                image).
+                Local model expects an axial/sagittal curvature map (Sag_A
+                type).
               </p>
             )}
           </div>

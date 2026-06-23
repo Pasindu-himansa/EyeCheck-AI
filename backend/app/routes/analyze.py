@@ -1,8 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from app.services.groq_service import analyze_topography_image
-from app.services.local_model_service import analyze_topography_image_local
+from app.services.local_model_service import analyze_topography_image_local, is_local_model_available
 
 router = APIRouter()
+
+@router.get("/model-status")
+def model_status():
+    return {"local_model_available": is_local_model_available()}
 
 @router.post("/analyze/cornea-topography")
 async def analyze_cornea_topography(
